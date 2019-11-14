@@ -1,0 +1,69 @@
+--1
+
+1) Write a query that allows you to inspect the schema of the naep table. - Incorrect. In this query you will actually want to query a system table that exists that holds the column and table information about the table naep itselg. The idea is to not SELECT the data from the naep table. This system table can be found in the SQL checkpoints.
+
+
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'naep';
+
+--2
+
+SELECT *
+FROM naep
+LIMIT 50;
+
+--3
+
+Write a query that returns summary statistics for avg_math_4_score by state, and sort the results alphabetically by state name. - You've included all the correct columns that need to be queried and more. Since you've already included the correct columns I will include the ones you need to keep and please remove the others. Also, ROUND() is not necessary on these columns. Keep this columns: state, COUNT(*), AVG(avg_math_4_score), MIN(avg_math_4_score), MAX(avg_math_4_score) - this is the same on problem 4.
+
+SELECT state, COUNT(*), AVG(avg_math_4_score) AS Average, MIN(avg_math_4_score) AS Minimum, MAX(avg_math_4_score) AS Maximum
+FROM naep
+GROUP BY state
+ORDER BY state;
+
+--4
+
+SELECT state, COUNT(avg_math_4_score), ROUND(AVG(avg_math_4_score),2) AS Average, ROUND(SUM(avg_math_4_score), 2) AS Sum, ROUND(MIN(avg_math_4_score),2) AS Minimum, MAX(avg_math_4_score) AS Maximum
+FROM naep
+GROUP BY state
+HAVING MAX(avg_math_4_score)-MIN(avg_math_4_score) > 30
+ORDER BY state;
+
+--5
+
+SELECT state AS bottom_10_states
+FROM naep
+WHERE year = 2000
+ORDER BY avg_math_4_score ASC
+LIMIT 10;
+
+--6.
+
+SELECT ROUND(AVG(avg_math_4_score), 2)
+FROM naep
+WHERE year = 2000;
+
+
+--7.
+
+SELECT state AS below_average_states_y2000
+FROM naep
+WHERE avg_math_4_score < 
+		(SELECT AVG(avg_math_4_score)
+		 FROM naep
+		WHERE year = 2000);
+
+--8.
+
+SELECT state AS scores_missing_y2000, avg_math_4_score
+FROM naep
+WHERE year = 2000 AND avg_math_4_score IS NULL;
+
+--9.
+
+SELECT naep.state, ROUND(avg_math_4_score, 2), total_expenditure
+FROM naep LEFT OUTER JOIN finance
+ON naep.id = finance.id
+WHERE naep.year = 2000 AND avg_math_4_score IS NOT NULL
+ORDER BY total_expenditure DESC;
